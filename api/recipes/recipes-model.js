@@ -40,9 +40,11 @@ const findById = async (recipe_id) => {
     return acc;
   }, {});
   
-  const keys = Object.keys(condensedRecipe);
+  // const keys = Object.keys(condensedRecipe);
 
-  // const organizedRecipeSteps = condensedRecipe[keys[0]].steps.reduce((acc, step) => {
+  // const rawStepsArray = condensedRecipe[keys[0]].steps;
+  
+  // const organizedSteps = rawStepsArray.reduce((acc, step) => {
   //   if (!step_id) {
   //     acc[scheme_name] = {
   //       scheme_id: scheme_id,
@@ -51,8 +53,8 @@ const findById = async (recipe_id) => {
   //     }
   //   } else {
   //   }    
-  // }
-  console.log(rawRecipeData);
+  // }, []);
+  // console.log(rawRecipeData);
   return condensedRecipe;
   // return rawRecipeData;
 }

@@ -6,33 +6,55 @@ const findById = async (recipe_id) => {
     .leftJoin('ingredients as i', 's.step_id', '=', 'i.step_id')
     .leftJoin('quantities as q', 'i.quantity_id', '=', 'q.quantity_id')
     .leftJoin('units as u', 'q.unit_id', '=', 'u.unit_id')
-    .select('r*, s.step_id, s.step_number, s.step_instructions')
+    .select('r.*', 's.step_id', 's.step_number', 's.instructions', 'i.ingredient_id', 'i.ingredient_name', 'q.quantity', 'u.unit_name')
     .where('r.recipe_id', '=', `${recipe_id}`)
     .orderBy('s.step_number');
   
-  // const organizedSchemes = rawSchemeData.reduce((acc, scheme) => {
-  //   const { instructions, scheme_name, step_id, step_number } = scheme;
-  //   if (acc[scheme_name]) {
-  //     acc[scheme_name].steps.push({ step_id, step_number, instructions });
-  //   } else {
-  //     if (!step_id) {
-  //       acc[scheme_name] = {
-  //         scheme_id: scheme_id,
-  //         scheme_name: scheme_name,
-  //         steps: []
-  //       }
-  //     } else {
-  //         acc[scheme_name] = {
-  //           scheme_id: scheme_id,
-  //           scheme_name: scheme_name,
-  //           steps: [{ step_id, step_number, instructions }]
-  //         }
-  //     }
-  //   }
-  //   return acc[scheme_name];
-  // }, {});
+  const condensedRecipe = await rawRecipeData.reduce((acc, recipe) => {
+    const { recipe_id, recipe_name, created_at, step_id, step_number, instructions } = recipe;
     
-  return rawRecipeData;
+    const ifIngredients = (recipe) => {
+      if (recipe.ingredient_id) {
+        return [{
+          ingredient_id: recipe.ingredient_id,
+          ingredient_name: recipe.ingredient_name,
+          quantity: `${recipe.quantity} ${recipe.unit_name}`
+        }]
+      } else {
+        return [];
+      }      
+    }
+
+    const ingredients = ifIngredients(recipe);
+
+    if (acc[recipe_name]) {
+      acc[recipe_name].steps.push({ step_id, step_number, instructions, ingredients });
+    } else {
+      acc[recipe_name] = {
+        recipe_id: recipe_id,
+        recipe_name: recipe_name,
+        created_at: created_at,
+        steps: [{ step_id, step_number, instructions, ingredients }]
+      }
+    }
+    return acc;
+  }, {});
+  
+  const keys = Object.keys(condensedRecipe);
+
+  // const organizedRecipeSteps = condensedRecipe[keys[0]].steps.reduce((acc, step) => {
+  //   if (!step_id) {
+  //     acc[scheme_name] = {
+  //       scheme_id: scheme_id,
+  //       scheme_name: scheme_name,
+  //       steps: []
+  //     }
+  //   } else {
+  //   }    
+  // }
+  console.log(rawRecipeData);
+  return condensedRecipe;
+  // return rawRecipeData;
 }
 
 module.exports = { findById }
